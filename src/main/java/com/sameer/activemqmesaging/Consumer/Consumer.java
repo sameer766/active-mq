@@ -18,9 +18,8 @@ public class Consumer implements MessageListener {
   public void onMessage(Message message) {
     try {
       ObjectMessage objectMessage = (ObjectMessage) message;
-      UserData employee = (UserData) objectMessage.getObject();
-      //do additional processing
-      log.info("Received Message: " + employee);
+      UserData userData = (UserData) objectMessage.getObject();
+      log.info("Received Message: " + userData);
     } catch (Exception e) {
       log.error("Received Exception : " + e);
     }

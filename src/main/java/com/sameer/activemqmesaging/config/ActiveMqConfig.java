@@ -19,7 +19,6 @@ public class ActiveMqConfig {
   @Value("${activemq.broker-url}")
   String brokerUrl;
 
-
   @Bean
   public JmsTemplate jmsTemplate() {
     JmsTemplate jmsTemplate = new JmsTemplate();
@@ -41,5 +40,4 @@ public class ActiveMqConfig {
     factory.setConnectionFactory(connectionFactory());
     return factory;
   }
-
 }
