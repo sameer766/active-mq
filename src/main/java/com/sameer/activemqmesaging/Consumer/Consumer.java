@@ -1,51 +1,28 @@
 package com.sameer.activemqmesaging.Consumer;
 
-import java.util.HashMap;
-import javax.jms.*;
+import com.sameer.activemqmesaging.UserData;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.ObjectMessage;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 @Component
-public class Consumer implements Runnable {
-
-  @JmsListener(destination = "memory_queue")
-  public void listen(HashMap<String, Integer> message) {
-    System.out.println("Got the message as : " + message);
-    // run();
-  }
+@Slf4j
+public class Consumer implements MessageListener {
 
   @Override
-  public void run() {
+  @JmsListener(destination = "memory_queue")
+  public void onMessage(Message message) {
     try {
-      ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-
-      //Create Connection
-      Connection connection = factory.createConnection();
-
-      // Start the connection
-      connection.start();
-
-      // Create Session
-      Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-
-      //Create queue
-      Destination queue = session.createQueue("Queue");
-
-      MessageConsumer consumer = session.createConsumer(queue);
-
-      Message message = consumer.receive(1000);
-
-      if (message instanceof TextMessage) {
-        TextMessage textMessage = (TextMessage) message;
-        String text = textMessage.getText();
-        System.out.println("Consumer Received: " + text);
-      }
-
-      session.close();
-      connection.close();
-    } catch (Exception ex) {
-      System.out.println("Exception Occured");
+      ObjectMessage objectMessage = (ObjectMessage) message;
+      UserData employee = (UserData) objectMessage.getObject();
+      //do additional processing
+      log.info("Received Message: " + employee);
+    } catch (Exception e) {
+      log.error("Received Exception : " + e);
     }
   }
 }

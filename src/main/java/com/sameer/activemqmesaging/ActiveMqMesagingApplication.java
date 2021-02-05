@@ -1,14 +1,14 @@
 package com.sameer.activemqmesaging;
 
-import javax.jms.ConnectionFactory;
+import javax.jms.Queue;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.activemq.command.ActiveMQQueue;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
-import org.springframework.jms.config.JmsListenerContainerFactory;
-import org.springframework.util.ErrorHandler;
+import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
+import org.springframework.jms.support.converter.MessageConverter;
+import org.springframework.jms.support.converter.MessageType;
 
 @SpringBootApplication
 @Slf4j
@@ -18,25 +18,17 @@ public class ActiveMqMesagingApplication {
     SpringApplication.run(ActiveMqMesagingApplication.class, args);
   }
 
+  @Bean // Serialize message content to json using TextMessage
+  public MessageConverter jacksonJmsMessageConverter() {
+    MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+    converter.setTargetType(MessageType.TEXT);
+    converter.setTypeIdPropertyName("_type");
+    return converter;
+  }
+
   @Bean
-  JmsListenerContainerFactory<?> jmsContainerFactory(ConnectionFactory connectionFactory,
-                                                     DefaultJmsListenerContainerFactoryConfigurer configurer) {
-    DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-
-    // anonymous class
-    factory.setErrorHandler(
-        new ErrorHandler() {
-          @Override
-          public void handleError(Throwable t) {
-            log.warn("An error has occurred in the transaction", t);
-          }
-        });
-
-    // lambda function
-    factory.setErrorHandler(t -> log.warn("An error has occurred in the transaction", t));
-
-    configurer.configure(factory, connectionFactory);
-    return factory;
+  public Queue queue() {
+    return new ActiveMQQueue("memory_queue");
   }
 
 }
